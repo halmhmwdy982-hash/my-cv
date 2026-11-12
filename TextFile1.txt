@@ -1,0 +1,685 @@
+import json
+class Person:
+    system_name = "Car Maintenance Management System"
+    def __init__(self, person_id, username, phone, email):
+        self._person_id = person_id
+        self._username = username
+        self._phone = phone
+        self._email = email
+    @property
+    def username(self):
+        return self._username
+
+    @username.setter
+    def username(self, value):
+
+        if not value.strip():
+            raise ValueError("Username cannot be empty")
+        self._username = value
+
+    @property
+    def phone(self):
+        return self._phone
+    @phone.setter
+    def phone(self, value):
+        Person.validate_phone(value)
+        self._phone = value
+        
+    @property
+    def email(self):
+        return self._email
+    @email.setter
+    def email(self, value):
+        if "@" not in value or "." not in value:
+            raise ValueError("Invalid email")
+        self._email = value
+
+    def display_info(self):
+        return (
+            f"ID: {self._person_id} | "
+            f"Username: {self._username} | "
+            f"Phone: {self._phone} | "
+            f"Email: {self._email}"
+        )
+    @staticmethod
+    def validate_phone(phone):
+        if not phone.isdigit():
+            raise ValueError(    "Phone must contain numbers only")
+        if len(phone) != 9:
+            raise ValueError("Phone must contain 9 digits")
+        if not phone.startswith(("77", "78", "73", "71")):
+            raise ValueError("Phone must start with 77, 78, 73 or 71")
+        return True
+    @classmethod
+    def get_system_name(cls):
+        return cls.system_name
+
+    def __str__(self):
+        return f"{self._person_id} - {self._username}"
+    def __eq__(self, other):
+        if isinstance(other, Person):
+            return self._person_id == other._person_id
+        return False
+
+#                2. CUSTOMER CLASS
+
+class Customer(Person):
+    def __init__(self,person_id,username,phone,email):
+        super().__init__(person_id,username,phone,email)
+        self.cars = []
+    def add_car(self, car_id):
+        self.cars.append(car_id)
+    def display_info(self):
+        return (f"Customer ID: {self._person_id} | "f"Username: {self._username} | "f"Phone: {self._phone} | "f"Email: {self._email}"
+        )
+    
+class Vehicle:
+    vehicle_types = { "1": "Toyota","2": "Hyundai","3": "Kia","4": "Nissan","5": "Other"
+    }
+    def __init__(self,vehicle_id,plate_number,model,year,owner_id):
+        self.vehicle_id = vehicle_id
+        self.plate_number = plate_number
+        self.model = model
+        self.year = year
+        self.owner_id = owner_id
+
+    def display_info(self):
+        return (
+            f"Vehicle ID: {self.vehicle_id} | "
+            f"Plate: {self.plate_number} | "
+            f"Model: {self.model} | "
+            f"Year: {self.year} | "
+            f"Owner ID: {self.owner_id}"        )
+
+    @staticmethod
+    def validate_year(year):
+        if not str(year).isdigit():
+            raise ValueError( "Year must contain numbers only")
+        year = int(year)
+        if year < 1980 or year > 2026:
+            raise ValueError("Year must be between 1980 and 2026")
+        return True
+    def __str__(self):
+        return (f"{self.vehicle_id} - {self.model}")
+    
+class Mechanic:
+    workshop_name = "Professional Car Workshop"
+    def __init__(self,mechanic_id,name,specialization):
+        self.mechanic_id = mechanic_id
+        self.name = name
+        self.specialization = specialization
+    def display_info(self):
+        return (
+            f"Mechanic ID: {self.mechanic_id} | "
+            f"Name: {self.name} | "
+            f"Specialization: {self.specialization}")
+    @staticmethod
+    def validate_name(name):
+        if not name.strip():
+            raise ValueError("Mechanic name cannot be empty")
+        return True
+    def __str__(self):
+        return (f"{self.mechanic_id} - {self.name}")
+class Service:
+    service_types = ("Oil Change","Engine Repair","Brake Repair","Tire Change","Electrical Repair","General Maintenance")
+    def init(self,service_id,vehicle_id,mechanic_id, service_type,cost):
+        self.service_id = service_id
+        self.vehicle_id = vehicle_id
+        self.mechanic_id = mechanic_id
+        self.service_type = service_type
+        self.cost = cost
+
+    def display_info(self):
+        return (f"Service ID: {self.service_id} | "
+                f"Vehicle ID: {self.vehicle_id} | "
+                f"Mechanic ID: {self.mechanic_id} | "
+                f"Service: {self.service_type} | "
+                f"Cost: {self.cost:.2f}")
+
+    @staticmethod
+    def validate_cost(cost):
+        try:
+            cost = float(cost)
+            if cost < 0:
+                raise ValueError( "Cost cannot be negative")
+            return cost
+        except ValueError:
+            raise ValueError("Cost must be a valid number")
+    def __str__(self):
+        return (f"{self.service_id} -"  f"{self.service_type}")
+        customers =[]
+        vehicles = []
+        mechanics =[]
+        services =[] 
+
+        customer_ids = set()
+        usernames = set()
+        phones = set()
+        emails = set()
+
+        vehicle_ids = set()
+        mechanic_ids = set()
+        service_ids = set()
+ 
+        FILE_NAME = "data.json"
+    def input_number(message):
+        while True:
+            try:
+                value = input(message).strip()
+                if not value.isdigit():
+                    raise ValueError(   "Please enter numbers only" )
+                return int(value)
+            except ValueError as e:
+                print("Error:", e)
+    def input_text(message):
+        while True:
+            try:
+                value = input(message).strip()
+                if not value:
+                    raise ValueError("Input cannot be empty" )
+                return value
+            except ValueError as e:
+
+                print("Error:", e)
+    def add_customer():
+        print("\n========== ADD CUSTOMER ==========")
+        customer_id = input_number("Enter Customer ID: ")
+
+        if customer_id in customer_ids:
+
+            raise ValueError(
+                "Customer ID already exists"
+        )
+
+        username = input_text("Enter Username: ")
+        if username in usernames:
+            raise ValueError("Username already exists"  )
+        phone = input("Enter Phone: ").strip()
+        Person.validate_phone(phone)
+        if phone in phones:
+            raise ValueError( "Phone already exists")
+        email = input("Enter Email: ").strip()
+        if "@" not in email or "." not in email:
+            raise ValueError("Invalid email")
+        if email in emails:
+            raise ValueError("Email already exists")
+    
+        customer = Customer(customer_id,username,phone,email)
+        customers.append(customer)
+        customer_ids.add(customer_id)
+        usernames.add(username)
+        phones.add(phone)
+        emails.add(email)
+        print("\nCustomer added successfully.")
+    def add_vehicle():
+        print("\n========== ADD VEHICLE ==========")
+        vehicle_id = input_number(  "Enter Vehicle ID: ")
+        if vehicle_id in vehicle_ids:
+            raise ValueError("Vehicle ID already exists")
+        owner_id = input_number("Enter Customer ID: ")
+        if owner_id not in customer_ids:
+            raise ValueError( "Customer does not exist")
+        plate = input_text("Enter Plate Number: ")
+        print("\nCar Models:")
+        for key, value in Vehicle.vehicle_types.items():
+            print(f"{key}. {value}")
+        choice = input_number("Choose car type: ")
+        if str(choice) not in Vehicle.vehicle_types:
+            raise ValueError( "Invalid car type")
+        model = Vehicle.vehicle_types[ str(choice) ]
+        year = input_number("Enter Year: "    )
+        Vehicle.validate_year(year)
+    
+        vehicle = Vehicle(vehicle_id, plate,model,year,owner_id)
+        vehicles.append(vehicle)
+        vehicle_ids.add(vehicle_id)
+        for customer in customers:
+            if customer._person_id == owner_id:
+                customer.add_car(vehicle_id)
+                break
+        print("\nVehicle added successfully.")
+    def add_mechanic():
+        print("\n========== ADD MECHANIC ==========")
+        mechanic_id = input_number("Enter Mechanic ID: ")
+        if mechanic_id in mechanic_ids:
+            raise ValueError("Mechanic ID already exists")
+        name = input_text( "Enter Mechanic Name: ")
+        Mechanic.validate_name(name)
+        specialization = input_text("Enter Specialization: ")
+    
+        mechanic = Mechanic(mechanic_id,name,specialization)
+        mechanics.append(mechanic)
+        mechanic_ids.add(mechanic_id)
+        print("\nMechanic added successfully.")
+    def add_service():
+        print("\n========== ADD SERVICE ==========")
+        service_id = input_number( "Enter Service ID: ")
+        if service_id in service_ids:
+            raise ValueError( "Service ID already exists")
+        vehicle_id = input_number("Enter Vehicle ID: ")
+        if vehicle_id not in vehicle_ids:
+            raise ValueError("Vehicle does not exist")
+        mechanic_id = input_number("Enter Mechanic ID: ")
+        if mechanic_id not in mechanic_ids:
+            raise ValueError("Mechanic does not exist")
+        print("\nService Types:")
+        for number, service_type in enumerate(
+            Service.service_types,
+            start=1):
+            print(f"{number}. {service_type}")
+        
+        choice = input_number ("Choose service: ")
+        if choice < 1 or choice > len( Service.service_types):
+            raise ValueError("Invalid service choice")
+        service_type = Service.service_types[
+        choice - 1]
+        cost = input(  "Enter Cost: ").strip()
+        cost = Service.validate_cost(cost)
+
+        service = Service(service_id,vehicle_id,mechanic_id,service_type,cost)
+        services.append(service)
+        service_ids.add(service_id)
+        print("\nService added successfully.")
+    def display_customers():
+        print("\n========== CUSTOMERS ==========")
+        if not customers:
+            print("No customers found.")
+            return
+        for customer in customers:
+            print(customer.display_info())
+            if customer.cars:
+                print("Cars:",customer.cars)
+    def display_vehicles():
+        print("\n========== VEHICLES ==========")
+        if not vehicles:
+            print("No vehicles found.")
+            return
+        for vehicle in vehicles:
+
+            print(vehicle.display_info())
+    def display_mechanics():
+        print("\n========== MECHANICS ==========")
+        if not mechanics:
+            print("No mechanics found.")
+            return
+        for mechanic in mechanics:
+            print(mechanic.display_info())
+    def display_services():
+        print("\n========== SERVICES ==========")
+        if not services:
+            print("No services found.")
+            return
+        for service in services:
+            print(service.display_info())
+    def search_vehicle():
+        print("\n========== SEARCH VEHICLE ==========")
+        vehicle_id = input_number("Enter Vehicle ID: ")
+        for vehicle in vehicles:
+            if vehicle.vehicle_id == vehicle_id:
+                print("\nVehicle Found:")
+                print(vehicle.display_info())
+            return
+        print("Vehicle not found.")
+    def delete_service():
+        print("\n========== DELETE SERVICE ==========")
+        service_id = input_number( "Enter Service ID: ")
+        for service in services:
+            if service.service_id == service_id:
+                services.remove(service)
+                service_ids.discard(service_id)
+            print("Service deleted successfully." )
+            return
+        print("Service not found.")
+    def update_customer():
+        print("\n========== UPDATE CUSTOMER ==========")
+        customer_id = input_number("Enter Customer ID: ")
+        for customer in customers:
+            if customer._person_id == customer_id:
+                print("""1. Update Username
+                     2. Update Phone
+                     3. Update Email """)
+            choice = input_number( "Choose: ")
+            if choice == 1:
+                new_username = input_text(  "Enter new username: ")
+                if new_username in usernames:
+                    raise ValueError(
+                        "Username already exists")
+                usernames.discard(customer.username)
+                customer.username = new_username
+                usernames.add(new_username)
+            elif choice == 2:
+                new_phone = input("Enter new phone: ").strip()
+                Person.validate_phone(new_phone)
+            if new_phone in phones:
+                raise ValueError(    "Phone already exists")
+                phones.discard(   customer.phone)
+                customer.phone = new_phone
+                phones.add(new_phone)
+            elif choice == 3:
+                new_email = input( "Enter new email: ").strip()
+            if "@" not in new_email:
+                raise ValueError( "Invalid email")
+            if new_email in emails:
+                raise ValueError("Email already exists")
+                emails.discard(customer.email)
+                customer.email = new_email
+                emails.add(new_email)
+            else:
+                raise ValueError(   "Invalid choice")
+            print("Customer updated successfully.")
+            return
+        print("Customer not found.")
+    def calculate_total(*costs):
+        return sum(costs)
+    def show_total_cost():
+        print("\n========== TOTAL COST ==========")
+        costs = [ service.costforservice in services]
+        total = calculate_total(*costs)
+        print(f"Total Maintenance Cost: {total:.2f}")
+    def sort_services_by_cost():
+        print( "\n========== SERVICES SORTED BY COST ==========")
+        if not services:
+            print("No services found.")
+        return
+        sorted_services = sorted(services, key=lambda service: service.cost)
+        for service in sorted_services:
+            print(service.display_info())
+    def show_information(**information):
+        print("\n========== INFORMATION ==========")
+        for key, value in information.items():
+            print(  f"{key}: {value}")
+    def create_customer_data(customer_id,username,phone,email):
+        data = {"zid": customer_id,  "username": username,"phone": phone, "email": email}
+        return data
+    def save_data():
+        data = {"customers": [
+           {"id": customer._person_id,
+                "username": customer.username,
+                "phone": customer.phone,
+                "email": customer.email,
+                "cars": customer.cars }
+        for customer in customers ],
+
+        "vehicles": [
+            {"id": vehicle.vehicle_id,
+            "plate": vehicle.plate_number,
+            "model": vehicle.model,
+            "year": vehicle.year,
+            "owner_id": vehicle.owner_id }
+        for vehicle in vehicles ],
+        "mechanics": [
+            {
+                "id": mechanic.mechanic_id,
+                "name": mechanic.name,
+                "specialization":
+                    mechanic.specialization
+          }
+        for mechanic in mechanics ],
+        "services": [
+            {
+                "id": service.service_id,
+                "vehicle_id":
+                    service.vehicle_id,
+                "mechanic_id":
+                    service.mechanic_id,
+                "service_type":
+                    service.service_type,
+                "cost":
+                    service.cost
+            }
+
+        for service in services
+        ]
+    }
+
+        try:
+
+            with open(FILE_NAME,"w",encoding="utf-8") as file:
+
+                json.dump(data,file,indent=4)
+
+                print("Data saved successfully.")
+
+        except Exception as e:
+            print("Error while saving data:",e)
+# =========================================================
+#                LOAD DATA FROM FILE
+# =========================================================
+    def load_data():
+
+        try:
+
+            with open(
+            FILE_NAME,
+            "r",
+            encoding="utf-8"
+            ) as file:
+
+                data = json.load(file)
+
+        # ---------------- Customers ----------------
+
+            for item in data.get(
+            "customers",
+            []
+        ):
+
+                customer = Customer(
+                item["id"],
+                item["username"],
+                item["phone"],
+                item["email"]
+            )
+
+            customer.cars = item.get(
+                "cars",
+                []
+            )
+
+            customers.append(customer)
+
+            customer_ids.add(
+                item["id"]
+            )
+
+            usernames.add(
+                item["username"]
+            )
+
+            phones.add(
+                item["phone"]
+            )
+
+            emails.add(
+                item["email"]
+            )
+
+        # ---------------- Vehicles ----------------
+
+            for item in data.get("vehicles",[]):
+                vehicle = Vehicle(
+                item["id"],
+                item["plate"],
+                item["model"],
+                item["year"],
+                item["owner_id"]
+            )
+
+            vehicles.append(vehicle)
+            vehicle_ids.add(
+                item["id"]
+            )
+
+        # ---------------- Mechanics ----------------
+
+            for item in data.get("mechanics",[]):
+                mechanic = Mechanic(
+                item["id"],
+                item["name"],
+                item["specialization"]
+            )
+
+                mechanics.append(mechanic)
+
+                mechanic_ids.add(item["id"])
+
+        # ---------------- Services ----------------
+
+            for item in data.get("services", []):
+
+                service = Service(
+                item["id"],
+                item["vehicle_id"],
+                item["mechanic_id"],
+                item["service_type"],
+                item["cost"]
+            )
+
+                services.append(service)
+
+                service_ids.add(
+                item["id"]
+            )
+
+            print("Data loaded successfully.")
+
+        except FileNotFoundError:
+
+            print(
+            "No data file found. Starting new system."
+        )
+
+        except json.JSONDecodeError:
+
+            print(
+            "Data file is empty or invalid."
+        )
+
+        except Exception as e:
+
+            print(
+            "Error while loading data:",
+            e
+        )
+
+
+# =========================================================
+#                SHOW SYSTEM INFORMATION
+# =========================================================
+
+    def system_information():
+
+        show_information(
+        System=Person.get_system_name(),
+        Customers=len(customers),
+        Vehicles=len(vehicles),
+        Mechanics=len(mechanics),
+        Services=len(services)
+    )
+
+
+# =========================================================
+#                MAIN MENU
+# =========================================================
+
+    def main():
+
+    # Load saved data
+        load_data()
+
+        print(
+        "\n=========================================="
+       )
+
+        print(
+        "     CAR MAINTENANCE MANAGEMENT SYSTEM"
+    )
+
+        print(
+        "=========================================="
+    )
+
+        while True:
+
+            print("""
+==========================================
+                MAIN MENU
+==========================================
+
+1.  Add Customer
+2.  Add Vehicle
+3.  Add Mechanic
+4.  Add Service
+5.  Display Customers
+6.  Display Vehicles
+7.  Display Mechanics
+8.  Display Services
+9.  Search Vehicle
+10. Delete Service
+11. Update Customer
+12. Calculate Total Cost
+13. Sort Services By Cost
+14. System Information
+15. Save Data
+16. Exit
+
+==========================================
+""")
+ 
+        try:
+
+            choice = input_number(  "Enter your choice: ")
+
+            if choice == 1:
+                add_customer()
+            elif choice == 2:
+                add_vehicle()
+            elif choice == 3:
+                add_mechanic()
+            elif choice == 4:
+                add_service()
+            elif choice == 5:
+                display_customers()
+            elif choice == 6:
+                display_vehicles()
+            elif choice == 7:
+                display_mechanics()
+            elif choice == 8:
+                display_services()
+            elif choice == 9:
+                search_vehicle()
+            elif choice == 10:
+                delete_service()
+            elif choice == 11:
+                update_customer()
+            elif choice == 12:
+                show_total_cost()
+            elif choice == 13:
+                sort_services_by_cost()
+            elif choice == 14:
+                system_information()
+            elif choice == 15:
+                save_data()
+            elif choice == 16:
+                save_data()
+                print(
+                    "\nThank you for using "
+                    "Car Maintenance System.")
+            break
+            else:
+                raise ValueError("Invalid menu choice")
+
+        except ValueError as e:
+            print("\nError:",e)
+
+        except NameError as e:
+            print("\nName Error:",e)
+
+        except Exception as e:
+            print("\nUnexpected Error:",e)
+# =========================================================
+#                PROGRAM STA
+# =========================================================
+            if __name__ == "__main__":
+                main()
+
